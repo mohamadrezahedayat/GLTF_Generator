@@ -27,12 +27,9 @@ namespace GLTF_Generator
             AssetValue = ",\"asset\" : {\"version\" : \"2.0\"}";
             CreateScene();
         }
-        public void CreateScene()
+        private void CreateScene()
         {
-            //Scenes = new List<Scene>();
             Scene = new Scene();
-            //Scenes.Add(Scene);
-
         }
         public string createGltf()
         {
@@ -211,8 +208,33 @@ namespace GLTF_Generator
             result = result.Remove(result.Length - 1);
             return result;
         }
-    }
 
+        public static List<Triangle> createCubeRectangles(float l, float h, float d, float x = 0, float y = 0, float z = 0)
+        {
+
+            //front
+            var tr1 = new Triangle(new Vertex(x, y, z), new Vertex(x + l, y, z), new Vertex(x + l, y + h, z));
+            var tr2 = new Triangle(new Vertex(x, y, z), new Vertex(x, y + h, z), new Vertex(x + l, y + h, z));
+            //left
+            var tr3 = new Triangle(new Vertex(x, y, z), new Vertex(x, y + h, z), new Vertex(x, y + h, z - d));
+            var tr4 = new Triangle(new Vertex(x, y, z), new Vertex(x, y, z - d), new Vertex(x, y + h, z - d));
+            //right
+            var tr5 = new Triangle(new Vertex(x + l, y, z), new Vertex(x + l, y, z - d), new Vertex(x + l, y + h, z - d));
+            var tr6 = new Triangle(new Vertex(x + l, y, z), new Vertex(x + l, y + h, z), new Vertex(x + l, y + h, z - d));
+            //top
+            var tr7 = new Triangle(new Vertex(x, y + h, z), new Vertex(x, y + h, z - d), new Vertex(x + l, y + h, z));
+            var tr8 = new Triangle(new Vertex(x + l, y + h, z), new Vertex(x + l, y + h, z - d), new Vertex(x, y + h, z - d));
+            //bottom
+            var tr9 = new Triangle(new Vertex(x, y, z), new Vertex(x, y, z - d), new Vertex(x + l, y, z));
+            var tr10 = new Triangle(new Vertex(x + l, y, z), new Vertex(x + l, y, z - d), new Vertex(x, y, z - d));
+            //back
+            var tr11 = new Triangle(new Vertex(x, y, z - d), new Vertex(x, y + h, z - d), new Vertex(x + l, y + h, z - d));
+            var tr12 = new Triangle(new Vertex(x, y, z - d), new Vertex(x + l, y, z - d), new Vertex(x + l, y + h, z - d));
+
+            var tris = new List<Triangle> { tr1, tr2, tr3, tr4, tr5, tr6, tr7, tr8, tr9, tr10, tr11, tr12 };
+            return tris;
+        }
+    }
 
     public class Scene
     {
@@ -273,8 +295,8 @@ namespace GLTF_Generator
     public class Mesh
     {
         public Buffer Buffer { get; set; }
-        public List<int> Indices { get; set; }
-        public List<float> vertices { get; set; }
+        private List<int> Indices { get; set; }
+        private List<float> vertices { get; set; }
         public List<Triangle> Triangles { get; set; }
         public Mesh(List<Triangle> Triangles)
         {
@@ -285,13 +307,16 @@ namespace GLTF_Generator
             Indices = new List<int>();
             vertices = new List<float>();
             int indice = 0;
-            //create buffer
+
+            //create buffer, bufferViews and accessors 
             Buffer = new Buffer();
             Buffer.Accessors = new List<Accessor>();
             Buffer.BufferViews = new List<BufferView>();
             var offset = 0;
-            var BufferPrefix = " \"uri\" : \"data:application/gltf-buffer;base64,";
-            var Bytes = new List<byte>();
+
+
+            //create indices and vertices lists
+
             foreach (var triangle in Triangles)
             {
                 Indices.Add(indice++);
@@ -307,6 +332,8 @@ namespace GLTF_Generator
                 vertices.Add(triangle.Vertex3.Y);
                 vertices.Add(triangle.Vertex3.Z);
             }
+
+            //to get max and min coords
             var verXs = new List<float>();
             var verYs = new List<float>();
             var verZs = new List<float>();
@@ -325,13 +352,19 @@ namespace GLTF_Generator
                     verZs.Add(vertices[i]);
                 }
             }
+            //create accessors
+            //accessor indices
             var accessor1 = new Accessor(0, 5123, Indices.Count(), "SCALAR", Convert.ToString(Indices.Count() - 1), "0");
             var max = $"[{verXs.Max()},{verYs.Max()},{verZs.Max()}]".Replace('/', '.');
             var min = $"[{verXs.Min()},{verYs.Min()},{verZs.Min()}]".Replace('/', '.');
 
+            //accessor vertices
             var accessor2 = new Accessor(0, 5126, vertices.Count(), "VEC3", max, min);
             Buffer.Accessors.Add(accessor1);
             Buffer.Accessors.Add(accessor2);
+
+            //create buffer byte array
+            var Bytes = new List<byte>();
             foreach (var i in Indices)
             {
                 if (i < 256)
@@ -365,75 +398,101 @@ namespace GLTF_Generator
             var BufferView2 = new BufferView(indicesByteLength + offset, verticesByteLength, 34962);
             Buffer.BufferViews.Add(BufferView2);
 
-
+            //create buffer URI String
             string base64 = Convert.ToBase64String(Bytes.ToArray());
-            //plus prefix
+            var BufferPrefix = " \"uri\" : \"data:application/gltf-buffer;base64,";
             Buffer.URI = BufferPrefix + base64;
 
         }
     }
+    public class Material
+    {
+
+
+
+    //    ,
+    //"materials": [
+    //    {
+    //        "pbrMetallicRoughness": {
+    //            "baseColorFactor": [
+    //                1.000,
+    //                0.766,
+    //                0.336,
+    //                1.0
+    //            ],
+    //            "metallicFactor": 0.5,
+    //            "roughnessFactor": 0.1
+    //        },
+    //        "doubleSided": true
+    //    }
+    //]
+    }
+
+    public class Buffer
+    {
+        public string URI { get; set; }
+        public int byteLength { get; set; }
+        public List<BufferView> BufferViews { get; set; }
+        public List<Accessor> Accessors { get; set; }
+    }
+    public class BufferView
+    {
+        public int buffer { get; set; }
+        public int byteOffset { get; set; }
+        public int byteLength { get; set; }
+        public int target { get; set; }
+        public BufferView(int byteOffset, int byteLength, int target)
+        {
+            this.byteOffset = byteOffset;
+            this.byteLength = byteLength;
+            this.target = target;
+        }
+    }
+    public class Accessor
+    {
+        public int byteOffset { get; set; }
+        public int componentType { get; set; }
+        public int count { get; set; }
+        public string type { get; set; }
+        public string max { get; set; }
+        public string min { get; set; }
+        public Accessor(int byteOffset, int componentType, int count, string type, string max, string min)
+        {
+            this.byteOffset = byteOffset;
+            this.componentType = componentType;
+            this.count = count;
+            this.type = type;
+            this.max = max;
+            this.min = min;
+        }
+    }
+
+    public class Triangle
+    {
+        public Vertex Vertex1 { get; set; }
+        public Vertex Vertex2 { get; set; }
+        public Vertex Vertex3 { get; set; }
+        public Triangle(Vertex v1, Vertex v2, Vertex v3)
+        {
+            Vertex1 = v1;
+            Vertex2 = v2;
+            Vertex3 = v3;
+        }
+    }
+    public class Vertex
+    {
+        public Vertex(float x, float y, float z)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+        }
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
+    }
+
 
 }
-public class Buffer
-{
-    public string URI { get; set; }
-    public int byteLength { get; set; }
-    public List<BufferView> BufferViews { get; set; }
-    public List<Accessor> Accessors { get; set; }
-}
-public class BufferView
-{
-    public int buffer { get; set; }
-    public int byteOffset { get; set; }
-    public int byteLength { get; set; }
-    public int target { get; set; }
-    public BufferView(int byteOffset, int byteLength, int target)
-    {
-        this.byteOffset = byteOffset;
-        this.byteLength = byteLength;
-        this.target = target;
-    }
-}
-public class Accessor
-{
-    public int byteOffset { get; set; }
-    public int componentType { get; set; }
-    public int count { get; set; }
-    public string type { get; set; }
-    public string max { get; set; }
-    public string min { get; set; }
-    public Accessor(int byteOffset, int componentType, int count, string type, string max, string min)
-    {
-        this.byteOffset = byteOffset;
-        this.componentType = componentType;
-        this.count = count;
-        this.type = type;
-        this.max = max;
-        this.min = min;
-    }
-}
 
-public class Triangle
-{
-    public Vertex Vertex1 { get; set; }
-    public Vertex Vertex2 { get; set; }
-    public Vertex Vertex3 { get; set; }
-    public Triangle(Vertex v1, Vertex v2, Vertex v3)
-    {
-        Vertex1 = v1;
-        Vertex2 = v2;
-        Vertex3 = v3;
-    }
-}
-public class Vertex
-{
-    public Vertex(float x, float y, float z)
-    {
-        X = x;
-        Y = y;
-        Z = z;
-    }
-    public float X { get; set; }
-    public float Y { get; set; }
-    public float Z { get; set; }
-}
+
