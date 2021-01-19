@@ -14,7 +14,8 @@ namespace GLTF_Generator
         private string MeshesValue { get; set; }
         private string BuffersValue { get; set; }
         private string BufferViewsValue { get; set; }
-        private string AccessorsVallue { get; set; }
+        private string AccessorsValue { get; set; }
+        private string MaterialsValue { get; set; }
         private string AssetValue { get; set; }
         public GltfGenerator()
         {
@@ -23,7 +24,8 @@ namespace GLTF_Generator
             MeshesValue = ",\"meshes\" :[";
             BuffersValue = ",\"buffers\" :[";
             BufferViewsValue = ",\"bufferViews\" :[";
-            AccessorsVallue = ",\"accessors\" :[";
+            AccessorsValue = ",\"accessors\" :[";
+            MaterialsValue = ",\"materials\" :[";
             AssetValue = ",\"asset\" : {\"version\" : \"2.0\"}";
             CreateScene();
         }
@@ -48,9 +50,12 @@ namespace GLTF_Generator
             // bufferview value---->"bufferViews" : [ {"buffer" : 0,"byteOffset" : 0,"byteLength" : 72,"target" : 34963 }, {"buffer" : 0,"byteOffset" : 72,   "byteLength" : 168  }, { "buffer" : 0,"byteOffset" : 240,"byteLength" : 6 }, {"buffer" : 0,"byteOffset" : 248,"byteLength" : 36 } ],
             BufferViewsValue += getBufferViewValue(Scene.Nodes);
             BufferViewsValue += "]";
+            //Material Value
+            MaterialsValue += getMaterialsValue(Scene.Nodes);
+            MaterialsValue += "]";
             // Accessor Value
-            AccessorsVallue += getAccessorValue(Scene.Nodes);
-            AccessorsVallue += "]";
+            AccessorsValue += getAccessorValue(Scene.Nodes);
+            AccessorsValue += "]";
 
             string GltfString = "{";
             GltfString += ScenesValue;
@@ -58,10 +63,38 @@ namespace GLTF_Generator
             GltfString += MeshesValue;
             GltfString += BuffersValue;
             GltfString += BufferViewsValue;
-            GltfString += AccessorsVallue;
+            GltfString += AccessorsValue;
+            GltfString += MaterialsValue;
             GltfString += AssetValue;
             GltfString += "}";
             return GltfString;
+        }
+
+        private string getMaterialsValue(List<Node> nodes)
+        {
+            string result = string.Empty;
+            foreach (var node in nodes)
+            {
+                if (node.Type == "mesh")
+                {
+                    foreach (var mesh in node.Meshes)
+                    {
+                        result += $"{{\"name\": \"{mesh.Material.Name}\",";
+                        result += "\"pbrMetallicRoughness\": {\"baseColorFactor\": [";
+                        result += $"{mesh.Material.pbrMetallicRoughness.baseColorFactor[0].ToString().Replace('/','.')},";
+                        result += $"{mesh.Material.pbrMetallicRoughness.baseColorFactor[1].ToString().Replace('/', '.')},";
+                        result += $"{mesh.Material.pbrMetallicRoughness.baseColorFactor[2].ToString().Replace('/', '.')},";
+                        result += $"{mesh.Material.pbrMetallicRoughness.baseColorFactor[3].ToString().Replace('/', '.')}],";
+                        result += $"\"metallicFactor\": {mesh.Material.pbrMetallicRoughness.metallicFactor.ToString().Replace('/', '.')},";
+                        result += $"\"roughnessFactor\": {mesh.Material.pbrMetallicRoughness.roughnessFactor.ToString().Replace('/', '.')}";
+                        result += " },";
+                        result += $"\"doubleSided\": {mesh.Material.DoubleSided.ToString().ToLower()}}},";
+                    }
+
+                }
+            }
+            result = result.Remove(result.Length - 1);
+            return result;
         }
 
         private string getScenesValue(List<Node> nodes)
@@ -168,13 +201,15 @@ namespace GLTF_Generator
         {
             string result = string.Empty;
             int i = 0;
+            int materialindex = 0;
             foreach (var node in nodes)
             {
                 if (node.Type == "mesh")
                 {
                     foreach (var mesh in node.Meshes)
                     {
-                        result += "{ \"primitives\": [ { \"attributes\" : { \"POSITION\" :" + (i + 1) + "  }, \"indices\" : " + i + "  } ] },";
+                        result += $"{{ \"primitives\": [ {{ \"attributes\" : {{ \"POSITION\" : { i + 1} }}, \"indices\" : { i } ,\"material\":{materialindex} }} ] }},";
+                        materialindex++;
                         i += 2;
                     }
 
@@ -297,6 +332,7 @@ namespace GLTF_Generator
         public Buffer Buffer { get; set; }
         private List<int> Indices { get; set; }
         private List<float> vertices { get; set; }
+        public Material Material { get; set; }
         public List<Triangle> Triangles { get; set; }
         public Mesh(List<Triangle> Triangles)
         {
@@ -407,25 +443,34 @@ namespace GLTF_Generator
     }
     public class Material
     {
+        public bool DoubleSided { get; set; }
+        public string Name { get; set; }
+        public float[] emissiveFactor { get; set; }
+        public string alphaMode { get; set; }
+        public float alphaCutoff { get; set; }
+        public pbrMetallicRoughness pbrMetallicRoughness { get; set; }
+        public Material(pbrMetallicRoughness pbrMetallicRoughness, bool DoubleSided, string name = "new material")
+        {
+            this.pbrMetallicRoughness = pbrMetallicRoughness;
+            this.DoubleSided = DoubleSided;
+            this.Name = name;
+            this.emissiveFactor = new float[3];
 
+        }
+    }
+    public class pbrMetallicRoughness
+    {
+        public float[] baseColorFactor { get; set; }
+        public float metallicFactor { get; set; }
+        public float roughnessFactor { get; set; }
+        public pbrMetallicRoughness(float[] baseColorFactor, float metallicFactor, float roughnessFactor)
+        {
+            this.baseColorFactor = new float[4];
+            this.baseColorFactor = baseColorFactor;
 
-
-    //    ,
-    //"materials": [
-    //    {
-    //        "pbrMetallicRoughness": {
-    //            "baseColorFactor": [
-    //                1.000,
-    //                0.766,
-    //                0.336,
-    //                1.0
-    //            ],
-    //            "metallicFactor": 0.5,
-    //            "roughnessFactor": 0.1
-    //        },
-    //        "doubleSided": true
-    //    }
-    //]
+            this.metallicFactor = metallicFactor;
+            this.roughnessFactor = roughnessFactor;
+        }
     }
 
     public class Buffer

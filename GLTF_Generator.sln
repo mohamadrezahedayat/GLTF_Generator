@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GLTF_Generator", "GLTF_Generator.csproj", "{8CC006D6-27B7-4E47-AAF6-456E1D2C9B9C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "to test gltf", "..\to test gltf\to test gltf.csproj", "{F444BFB2-34C9-4783-9D06-33F89C916236}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\ConsoleApp1.csproj", "{A49CB37A-E992-41F4-A71E-8C0223E64B50}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{8CC006D6-27B7-4E47-AAF6-456E1D2C9B9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CC006D6-27B7-4E47-AAF6-456E1D2C9B9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CC006D6-27B7-4E47-AAF6-456E1D2C9B9C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F444BFB2-34C9-4783-9D06-33F89C916236}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F444BFB2-34C9-4783-9D06-33F89C916236}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F444BFB2-34C9-4783-9D06-33F89C916236}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F444BFB2-34C9-4783-9D06-33F89C916236}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A49CB37A-E992-41F4-A71E-8C0223E64B50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A49CB37A-E992-41F4-A71E-8C0223E64B50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A49CB37A-E992-41F4-A71E-8C0223E64B50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A49CB37A-E992-41F4-A71E-8C0223E64B50}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
