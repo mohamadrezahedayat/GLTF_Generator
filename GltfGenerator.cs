@@ -73,15 +73,26 @@ namespace GLTF_Generator
         private string getMaterialsValue(List<Node> nodes)
         {
             string result = string.Empty;
+            int matNameIndex = 1;
+            var rand = new Random();
             foreach (var node in nodes)
             {
                 if (node.Type == "mesh")
                 {
                     foreach (var mesh in node.Meshes)
                     {
+                        if (mesh.Material == null)
+                        {
+                           
+                            var basecolorFactor = new float[] { (float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble() };
+                            var pbrMetallicRoughness = new pbrMetallicRoughness(basecolorFactor, (float)rand.NextDouble(), (float)rand.NextDouble());
+                            var material = new Material(pbrMetallicRoughness, true, $"Random Material{matNameIndex}");
+                            mesh.Material = material;
+                            matNameIndex++;
+                        }
                         result += $"{{\"name\": \"{mesh.Material.Name}\",";
                         result += "\"pbrMetallicRoughness\": {\"baseColorFactor\": [";
-                        result += $"{mesh.Material.pbrMetallicRoughness.baseColorFactor[0].ToString().Replace('/','.')},";
+                        result += $"{mesh.Material.pbrMetallicRoughness.baseColorFactor[0].ToString().Replace('/', '.')},";
                         result += $"{mesh.Material.pbrMetallicRoughness.baseColorFactor[1].ToString().Replace('/', '.')},";
                         result += $"{mesh.Material.pbrMetallicRoughness.baseColorFactor[2].ToString().Replace('/', '.')},";
                         result += $"{mesh.Material.pbrMetallicRoughness.baseColorFactor[3].ToString().Replace('/', '.')}],";

@@ -43,10 +43,7 @@ namespace ConsoleApp1
             trs2.AddRange(cube9);
             trs2.AddRange(cube10);
             var mesh2 = new Mesh(trs2);
-            var basecolorFactor2 = new float[] { (float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble() };
-            var pbrMetallicRoughness2 = new pbrMetallicRoughness(basecolorFactor2, (float)rand.NextDouble(), (float)rand.NextDouble());
-            var material2 = new Material(pbrMetallicRoughness2, true, "mat2");
-            mesh2.Material = material2;
+            
             var node2 = new Node(mesh2);
 
             var gltf = new GltfGenerator();
