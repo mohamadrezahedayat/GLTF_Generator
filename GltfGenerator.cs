@@ -83,7 +83,7 @@ namespace GLTF_Generator
                     {
                         if (mesh.Material == null)
                         {
-                           
+
                             var basecolorFactor = new float[] { (float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble(), (float)rand.NextDouble() };
                             var pbrMetallicRoughness = new pbrMetallicRoughness(basecolorFactor, (float)rand.NextDouble(), (float)rand.NextDouble());
                             var material = new Material(pbrMetallicRoughness, true, $"Random Material{matNameIndex}");
@@ -115,7 +115,10 @@ namespace GLTF_Generator
             result += "{\"nodes\" : [";
             foreach (var node in nodes)
             {
-                result += $"{i++},";
+                foreach (var mesh in node.Meshes)
+                {
+                    result += $"{i++},";
+                }
             }
             result = result.Remove(result.Length - 1);
             result += "]}";
@@ -210,6 +213,7 @@ namespace GLTF_Generator
 
         private string getMeshValues(List<Node> nodes)
         {
+
             string result = string.Empty;
             int i = 0;
             int materialindex = 0;
@@ -228,6 +232,8 @@ namespace GLTF_Generator
             }
             result = result.Remove(result.Length - 1);
             return result;
+
+
         }
 
         private string getNodesValue(List<Node> nodes)
@@ -238,7 +244,10 @@ namespace GLTF_Generator
             {
                 if (node.Type == "mesh")
                 {
-                    result += "{" + $"\"mesh\":{i++}" + "},";
+                    foreach (var mesh in node.Meshes)
+                    {
+                        result += "{" + $"\"mesh\":{i++}" + "},";
+                    }
                 }
                 else
                 {
